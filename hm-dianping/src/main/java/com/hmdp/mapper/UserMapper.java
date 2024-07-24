@@ -2,6 +2,7 @@ package com.hmdp.mapper;
 
 import com.hmdp.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -12,5 +13,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2021-12-22
  */
 public interface UserMapper extends BaseMapper<User> {
+    User selectUserByPhone(String phone);
 
+    int insertSelective(User user);
 }
+

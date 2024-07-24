@@ -1,12 +1,16 @@
 package com.hmdp.controller;
 
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import com.hmdp.dto.LoginFormDTO;
 import com.hmdp.dto.Result;
+import com.hmdp.dto.UserDTO;
+import com.hmdp.entity.User;
 import com.hmdp.entity.UserInfo;
 import com.hmdp.service.IUserInfoService;
 import com.hmdp.service.IUserService;
+import com.hmdp.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -42,7 +46,7 @@ public class UserController {
      */
     @PostMapping("code")
     public Result sendCode(@RequestParam("phone") String phone, HttpSession session,  HttpServletRequest request) {
-        // TODO 发送短信验证码并保存验证码
+        //  发送短信验证码并保存验证码
         return userService.sendCode(phone, session, request);
 
     }
@@ -53,8 +57,9 @@ public class UserController {
      */
     @PostMapping("/login")
     public Result login(@RequestBody LoginFormDTO loginForm, HttpSession session){
-        // TODO 实现登录功能
-        return Result.fail("功能未完成");
+        //  实现登录功能
+
+        return userService.login(loginForm,session);
     }
 
     /**
@@ -62,15 +67,16 @@ public class UserController {
      * @return 无
      */
     @PostMapping("/logout")
-    public Result logout(){
-        // TODO 实现登出功能
-        return Result.fail("功能未完成");
+    public Result logout(HttpServletRequest request){
+        //  实现登出功能
+        return userService.logout(request);
     }
 
     @GetMapping("/me")
     public Result me(){
-        // TODO 获取当前登录的用户并返回
-        return Result.fail("功能未完成");
+        //  获取当前登录的用户并返回
+        UserDTO userDTO = UserHolder.getUser();
+        return Result.ok(userDTO);
     }
 
     @GetMapping("/info/{id}")

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hmdp.mapper.UserMapper">
+
+    <select id="selectUserByPhone" resultType="com.hmdp.entity.User">
+        SELECT * from tb_user where phone = #{phone};
+    </select>
+
+    <insert id="insertSelective">
+        insert into tb_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="phone != null">phone,</if>
+            <if test="password != null">password,</if>
+            <if test="nickName != null">nick_name,</if>
+            <if test="icon != null">icon,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id,jdbcType=NUMERIC},</if>
+            <if test="phone != null">#{phone,jdbcType=VARCHAR},</if>
+            <if test="password != null">#{password,jdbcType=VARCHAR},</if>
+            <if test="nickName != null">#{nickName,jdbcType=VARCHAR},</if>
+            <if test="icon != null">#{icon,jdbcType=VARCHAR},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+</mapper>

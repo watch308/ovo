@@ -3,6 +3,8 @@ package com.hmdp.mapper;
 import com.hmdp.entity.Shop;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
+import java.io.Serializable;
+
 /**
  * <p>
  *  Mapper 接口
@@ -12,5 +14,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @since 2021-12-22
  */
 public interface ShopMapper extends BaseMapper<Shop> {
-
+    @Override
+    Shop selectById(Serializable id);
 }

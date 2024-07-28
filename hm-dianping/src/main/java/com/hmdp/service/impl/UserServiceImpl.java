@@ -86,16 +86,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 转为DTO
         UserDTO userDTO= new UserDTO();
         userDTO.toDTO(user);
-        // 保存到redis
         Map<String, Object> map = BeanUtil.beanToMap(userDTO);
         // 生成随机token
         String token = UUID.randomUUID().toString(true);
-        Map<String,String> strMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            strMap.put(entry.getKey(), String.valueOf(entry.getValue()));
-        }
-
-        redisTemplate.opsForHash().putAll(LOGIN_USER_KEY+token,strMap);
+        // 转换Long id
+        map.replaceAll((k, v) -> String.valueOf(v));
+        // 保存登录信息到 Redis
+        redisTemplate.opsForHash().putAll(LOGIN_USER_KEY+token,map);
         redisTemplate.expire(LOGIN_USER_KEY+token,LOGIN_USER_TTL, TimeUnit.SECONDS);
 
         return Result.ok(token);

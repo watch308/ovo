@@ -42,8 +42,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         if (!shopRedisMap.isEmpty()) {
 
             Shop shop = BeanUtil.fillBeanWithMap(shopRedisMap, new Shop(), false);
-            // 更新时间
-            stringRedisTemplate.expire(shopKey, CACHE_SHOP_TTL, TimeUnit.MINUTES);
+
             return Result.ok(shop);
         }
         // 不存在 查数据库

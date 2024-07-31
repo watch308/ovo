@@ -16,4 +16,6 @@ import java.io.Serializable;
 public interface ShopMapper extends BaseMapper<Shop> {
     @Override
     Shop selectById(Serializable id);
+
+    void update(Shop shop);
 }

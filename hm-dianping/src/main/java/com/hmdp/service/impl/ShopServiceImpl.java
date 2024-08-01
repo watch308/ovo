@@ -15,8 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.hmdp.utils.RedisConstants.CACHE_SHOP_KEY;
-import static com.hmdp.utils.RedisConstants.CACHE_SHOP_TTL;
+import static com.hmdp.utils.RedisConstants.*;
 
 /**
  * <p>
@@ -30,7 +29,6 @@ import static com.hmdp.utils.RedisConstants.CACHE_SHOP_TTL;
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-
     @Resource
     private ShopMapper shopMapper;
 
@@ -41,7 +39,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         Map<Object, Object> shopRedisMap = stringRedisTemplate.opsForHash().entries(shopKey);
         // 存在 返回
         if (!shopRedisMap.isEmpty()) {
-
+            // 空map 返回
+            if(shopRedisMap.containsKey("empty")){
+                shopRedisMap.get("empty");
+                return Result.fail("不存在");
+            }
             Shop shop = BeanUtil.fillBeanWithMap(shopRedisMap, new Shop(), false);
 
             return Result.ok(shop);
@@ -68,6 +70,8 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             return Result.ok(shop);
         }
 
+        stringRedisTemplate.opsForHash().put(shopKey,  "empty", "");
+        stringRedisTemplate.expire(shopKey, CACHE_NULL_TTL, TimeUnit.MINUTES);
         return Result.fail("不存在");
 
     }

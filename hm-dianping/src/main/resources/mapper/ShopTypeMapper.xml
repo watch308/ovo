@@ -7,4 +7,8 @@
         from tb_shop_type
         order by id
     </select>
+    <select id="querySize" resultType="java.lang.Integer">
+        select count(*)
+        from tb_shop_type
+    </select>
 </mapper>

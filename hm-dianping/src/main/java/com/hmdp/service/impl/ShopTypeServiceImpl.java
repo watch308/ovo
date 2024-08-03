@@ -7,14 +7,13 @@ import com.hmdp.entity.ShopType;
 import com.hmdp.mapper.ShopTypeMapper;
 import com.hmdp.service.IShopTypeService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hmdp.utils.RedisConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static com.hmdp.utils.RedisConstants.*;
@@ -34,15 +33,29 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private ShopTypeMapper shopTypeMapper;
+    private int shopTypeSize;
 
     @Override
     public Result queryTypeList() {
-        String shopTypeKey = CACHE_SHOPTYPE_KEY;
+        shopTypeSize = queryShopTypeSize();
+        if (shopTypeSize == 0) {
+            return Result.fail("无分类");
+        }
+        List<ShopType> shopTypeList = queryTypeListWithMutex();
+        if (shopTypeList == null)
+            return Result.fail("无分类");
+        return Result.ok(shopTypeList);
+    }
+
+
+    public List<ShopType> queryTypeListWithMutex() {
+
+        String shopTypeKey = CACHE_SHOP_TYPE_KEY;
         Long size = stringRedisTemplate.opsForList().size(shopTypeKey);
         List<ShopType> shopTypeList = new ArrayList<>();
 
         // Redis存在 返回
-        if (size != null && size == CACHE_SHOPTYPE_SIZE) {
+        if (size != null && size == shopTypeSize) {
             List<String> shopTypeJsonList = stringRedisTemplate.opsForList().range(shopTypeKey, 0, -1);
             if (shopTypeJsonList != null) {
                 for (String shopTypeJson : shopTypeJsonList) {
@@ -50,23 +63,78 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
                 }
 
             }
-            return Result.ok(shopTypeList);
+            return shopTypeList;
         }
-        // Redis 不存在 查数据库
-        List<ShopType> shopTypeListBase = shopTypeMapper.queryAll();
 
-        if (shopTypeListBase!=null&&shopTypeListBase.size()==CACHE_SHOPTYPE_SIZE) {
-            //清空错误的值
-            stringRedisTemplate.delete(CACHE_SHOPTYPE_KEY);
-            // 写回Redis
-            for (ShopType shopType : shopTypeListBase) {
-                String shopTypeJson = JSONUtil.toJsonStr(shopType);
-                stringRedisTemplate.opsForList().rightPush(shopTypeKey, shopTypeJson);
+        try {
+            // 获取锁
+            boolean isLock = lock(LOCK_SHOP_KEY);
+            // 失败则重试
+            if (!isLock) {
+                Thread.sleep(50);
+                return queryTypeListWithMutex();
             }
-            stringRedisTemplate.expire(shopTypeKey, CACHE_SHOPTYPE_TTL, TimeUnit.MINUTES);
-
-            return Result.ok(shopTypeListBase);
+            // Redis 不存在 查数据库
+            List<ShopType> shopTypeListBase = shopTypeMapper.queryAll();
+            Thread.sleep(200);
+            if (shopTypeListBase != null && !shopTypeListBase.isEmpty()) {
+                //清空错误的值
+                stringRedisTemplate.delete(CACHE_SHOP_TYPE_KEY);
+                // 写回Redis
+                for (ShopType shopType : shopTypeListBase) {
+                    String shopTypeJson = JSONUtil.toJsonStr(shopType);
+                    stringRedisTemplate.opsForList().rightPush(shopTypeKey, shopTypeJson);
+                }
+                stringRedisTemplate.expire(shopTypeKey, CACHE_SHOP_TYPE_TTL, TimeUnit.MINUTES);
+                return shopTypeListBase;
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            unlock(LOCK_SHOP_TYPE_KEY);
         }
-        return Result.fail("无商店分类");
+        return null;
+    }
+
+
+
+    boolean lock(String key) {
+        return Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(key, "locked", 10, TimeUnit.SECONDS));
+    }
+
+    void unlock(String key) {
+        stringRedisTemplate.delete(key);
+    }
+
+    @Override
+    public int queryShopTypeSize() {
+        String shopTypeSizeKey = CACHE_SHOP_TYPE_SIZE_KEY;
+        String lockKey = LOCK_SHOP_TYPE_SIZE_KEY;
+        String shopTypeSizeStr = stringRedisTemplate.opsForValue().get(shopTypeSizeKey);
+        if (StrUtil.isNotBlank(shopTypeSizeStr)) {
+            return Integer.parseInt(Objects.requireNonNull(shopTypeSizeStr));
+        }
+        // 获取锁
+        try {
+            // 不存在 查数据库 写入Redis
+            boolean isLock = lock(lockKey);
+            if (!isLock) {
+                Thread.sleep(10);
+                queryShopTypeSize();
+            }
+            String size = stringRedisTemplate.opsForValue().get(shopTypeSizeKey);
+            if (StrUtil.isNotBlank(size)) {
+                return Integer.parseInt(Objects.requireNonNull(size));
+            }
+            int shopTypeSize = shopTypeMapper.querySize();
+            Thread.sleep(200);
+            stringRedisTemplate.opsForValue().set(shopTypeSizeKey, String.valueOf(shopTypeSize)
+                    , CACHE_SHOP_TYPE_SIZE_TTL, TimeUnit.MINUTES);
+            return shopTypeSize;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            unlock(lockKey);
+        }
     }
 }

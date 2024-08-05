@@ -6,12 +6,14 @@ import com.hmdp.entity.Shop;
 import com.hmdp.mapper.ShopMapper;
 import com.hmdp.service.IShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hmdp.utils.CacheClient;
 import com.hmdp.utils.RedisData;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,25 +39,28 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     private ShopMapper shopMapper;
 
     private static final ExecutorService CACHE_REBUILT_EXECUTOR = Executors.newFixedThreadPool(10);
+    @Resource
+    private CacheClient cacheClient;
 
     @Override
-    public Result queryShopById(Long id) {
+    public Result queryShopById(Long id) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Shop shop;
         // 判断是否为热点
-        if(hotId(id)){
-            shop = queryShopWithLogicalExpire(id);
+        if (hotId(id)) {
+            shop = cacheClient.queryShopWithLogicalExpire(CACHE_SHOP_KEY, LOCK_SHOP_KEY, id, Shop.class,
+                    id2 -> shopMapper.selectById(id2), CACHE_SHOP_TTL, TimeUnit.SECONDS);
+        } else {
+            shop = cacheClient.queryWithPassThrough(CACHE_SHOP_KEY, id, Shop.class,
+                    id2 -> shopMapper.selectById(id2), CACHE_SHOP_TTL, TimeUnit.MINUTES);
         }
-        else {
-           shop = queryShopWithPassThrough(id);
-        }
-        if (shop==null){
+        if (shop == null) {
             return Result.fail("无");
         }
         return Result.ok(shop);
     }
 
     private boolean hotId(Long id) {
-        return id==1;
+        return id == 1;
     }
 
     public Shop queryShopWithLogicalExpire(Long id) {
@@ -121,8 +126,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             RedisData redisData = (RedisData) data;
             map = BeanUtil.beanToMap(redisData.getData());
             map.put("expireTime", redisData.getExpireTime());
-        }
-        else {
+        } else {
             return null;
         }
 
@@ -157,7 +161,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         stringRedisTemplate.delete(key);
     }
 
-   public Shop queryShopWithPassThrough(Long id) {
+    public Shop queryShopWithPassThrough(Long id) {
         // 在redis上查询
         String shopKey = CACHE_SHOP_KEY + id;
         Map<Object, Object> shopRedisMap = stringRedisTemplate.opsForHash().entries(shopKey);
@@ -169,7 +173,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
                 return null;
             }
 
-           return BeanUtil.fillBeanWithMap(shopRedisMap, new Shop(), false);
+            return BeanUtil.fillBeanWithMap(shopRedisMap, new Shop(), false);
         }
         // 不存在 查数据库
         Shop shopData = shopMapper.selectById(id);

@@ -4,6 +4,8 @@ import com.hmdp.dto.Result;
 import com.hmdp.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * <p>
  *  服务类
@@ -14,7 +16,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IShopService extends IService<Shop> {
 
-    Result queryShopById(Long id);
+    Result queryShopById(Long id) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException;
 
     Result updateShop(Shop shop);
 }

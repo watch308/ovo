@@ -59,7 +59,10 @@ public class UserController {
     public Result login(@RequestBody LoginFormDTO loginForm, HttpSession session){
         //  实现登录功能
 
+        if(StrUtil.isNotBlank(loginForm.getCode()))
         return userService.login(loginForm,session);
+        else
+            return userService.loginWithPassword(loginForm,session);
     }
 
     /**

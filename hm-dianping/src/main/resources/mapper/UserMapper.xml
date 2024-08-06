@@ -6,7 +6,6 @@
     <select id="selectUserByPhone" resultType="com.hmdp.entity.User">
         SELECT * from tb_user where phone = #{phone};
     </select>
-
     <insert id="insertSelective">
         insert into tb_user
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -29,5 +28,25 @@
             <if test="updateTime != null">#{updateTime},</if>
         </trim>
     </insert>
+
+    <select id="selectPasswordByPhone" resultType="String">
+        select password
+        from tb_user
+        where
+        phone = #{phone,jdbcType=VARCHAR}
+    </select>
+    <update id="updateSelective">
+        update tb_user
+        <set>
+            <if test="phone != null">phone=#{phone,jdbcType=VARCHAR},</if>
+            <if test="password != null">password=#{password,jdbcType=VARCHAR},</if>
+            <if test="nickName != null">nick_name=#{nickName,jdbcType=VARCHAR},</if>
+            <if test="icon != null">icon=#{icon,jdbcType=VARCHAR},</if>
+            <if test="createTime != null">create_time=NOW(),</if>
+            <if test="updateTime != null">update_time=NOW(),</if>
+        </set>
+        where phone = #{phone,jdbcType=NUMERIC}
+    </update>
+
 
 </mapper>

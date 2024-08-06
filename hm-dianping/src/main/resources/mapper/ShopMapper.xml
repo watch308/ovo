@@ -4,7 +4,28 @@
 <mapper namespace="com.hmdp.mapper.ShopMapper">
 
 
+
     <select id="selectById" resultType="com.hmdp.entity.Shop">
         select * from tb_shop where id = #{id}
     </select>
+    <update id="update" parameterType="com.hmdp.entity.Shop">
+        UPDATE tb_shop
+        <set>
+            <if test="address != null and address != ''">address = #{address},</if>
+            <if test="area != null and area != ''">area = #{area},</if>
+            <if test="avgPrice != null">avg_price = #{avgPrice},</if>
+            <if test="comments != null and comments != ''">comments = #{comments},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="images != null and images != ''">images = #{images},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="openHours != null and openHours != ''">open_hours = #{openHours},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="sold != null">sold = #{sold},</if>
+            <if test="typeId != null">type_id = #{typeId},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="x != null">x = #{x},</if>
+            <if test="y != null">y = #{y}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
 </mapper>

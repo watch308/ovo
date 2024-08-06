@@ -1,4 +1,5 @@
 package com.hmdp.mapper;
+import java.util.List;
 
 import com.hmdp.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -16,5 +17,9 @@ public interface UserMapper extends BaseMapper<User> {
     User selectUserByPhone(String phone);
 
     int insertSelective(User user);
+
+    String selectPasswordByPhone(@Param("phone") String phone);
+
+    int updateSelective(User user);
 }
 

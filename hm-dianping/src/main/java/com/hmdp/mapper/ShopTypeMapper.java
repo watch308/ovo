@@ -16,4 +16,6 @@ import java.util.List;
 public interface ShopTypeMapper extends BaseMapper<ShopType> {
 
     List<ShopType> queryAll();
+
+    int querySize();
 }

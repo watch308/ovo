@@ -12,10 +12,14 @@ public class RedisConstants {
 
     public static final Long CACHE_SHOP_TTL = 30L;
     public static final String CACHE_SHOP_KEY = "cache:shop:";
-    public static final Long CACHE_SHOPTYPE_TTL = 30L;
-    public static final String CACHE_SHOPTYPE_KEY = "cache:shopType:";
+    public static final Long CACHE_SHOP_TYPE_TTL = 30L;
+    public static final String CACHE_SHOP_TYPE_KEY = "cache:shopType";
 
+    public static final String CACHE_SHOP_TYPE_SIZE_KEY = "cache:shopType:size";
+    public static final int CACHE_SHOP_TYPE_SIZE_TTL = 240;
     public static final String LOCK_SHOP_KEY = "lock:shop:";
+    public static final String LOCK_SHOP_TYPE_KEY = "lock:shopType";
+    public static final String LOCK_SHOP_TYPE_SIZE_KEY = "lock:shopTypeSize";
     public static final Long LOCK_SHOP_TTL = 10L;
 
     public static final String SECKILL_STOCK_KEY = "seckill:stock:";

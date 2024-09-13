@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hmdp.mapper.SeckillVoucherMapper">
+
+
+    <update id="updateStockByVoucherId">
+        update tb_seckill_voucher
+        set stock = stock - 1
+        <where>
+            <if test="voucherId != null">
+                voucher_id = #{voucherId,jdbcType=NUMERIC} and stock > 0
+            </if>
+        </where>
+    </update>
+    <select id="selectByVoucherId" resultType="com.hmdp.entity.SeckillVoucher">
+        select voucher_id,stock,begin_time,end_time
+        from tb_seckill_voucher
+        <where>
+            <if test="voucherId != null">
+                voucher_id = #{voucherId,jdbcType=NUMERIC}
+            </if>
+        </where>
+    </select>
+
+</mapper>

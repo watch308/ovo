@@ -17,10 +17,11 @@ public class SimpleRedisLock implements ILock{
     private StringRedisTemplate stringRedisTemplate;
     private static final String V_PREFIX = UUID.randomUUID().toString(true);
     private static final String PREFIX="lock:";
-    private static DefaultRedisScript<String> unLockScript;
+    private static DefaultRedisScript<Long> unLockScript;
     static {
         unLockScript = new DefaultRedisScript<>();
         unLockScript.setLocation(new ClassPathResource("unLock.lua"));
+        unLockScript.setResultType(Long.class);
     }
     public SimpleRedisLock(String name,StringRedisTemplate stringRedisTemplate){
         this.name = name;

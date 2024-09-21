@@ -35,6 +35,9 @@
         where
         phone = #{phone,jdbcType=VARCHAR}
     </select>
+    <select id="selectById" resultType="com.hmdp.entity.User">
+
+    </select>
     <update id="updateSelective">
         update tb_user
         <set>
@@ -47,6 +50,13 @@
         </set>
         where phone = #{phone,jdbcType=NUMERIC}
     </update>
+    <select id="selectOneById" resultType="com.hmdp.entity.User">
+        select
+        id,nick_name,icon
+        from tb_user
+        where
+        id = #{id,jdbcType=NUMERIC}
+    </select>
 
 
 </mapper>

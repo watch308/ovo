@@ -1,4 +1,5 @@
 package com.hmdp.mapper;
+import java.io.Serializable;
 import java.util.List;
 
 import com.hmdp.entity.User;
@@ -16,6 +17,7 @@ import org.apache.ibatis.annotations.Param;
 public interface UserMapper extends BaseMapper<User> {
     User selectUserByPhone(String phone);
 
+    User selectOneById(@Param("id") Long id);
     int insertSelective(User user);
 
     String selectPasswordByPhone(@Param("phone") String phone);

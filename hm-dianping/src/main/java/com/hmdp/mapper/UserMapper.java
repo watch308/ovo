@@ -1,7 +1,7 @@
 package com.hmdp.mapper;
-import java.io.Serializable;
 import java.util.List;
 
+import com.hmdp.dto.UserDTO;
 import com.hmdp.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -23,5 +23,6 @@ public interface UserMapper extends BaseMapper<User> {
     String selectPasswordByPhone(@Param("phone") String phone);
 
     int updateSelective(User user);
+    List<UserDTO> searchAllById(List<Long> id);
 }
 

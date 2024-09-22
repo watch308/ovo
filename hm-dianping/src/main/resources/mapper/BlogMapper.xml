@@ -9,4 +9,22 @@
         where
         id = #{id,jdbcType=NUMERIC}
     </select>
+    <update id="icrLikedById">
+        update tb_blog
+        set liked = liked+1
+        where
+        id = #{id,jdbcType=NUMERIC}
+    </update>
+    <update id="dcrLikedById">
+        update tb_blog
+        set liked = liked-1
+        where
+        id = #{id,jdbcType=NUMERIC}
+    </update>
+    <update id="updateLikedById">
+        update tb_blog
+        set liked = #{liked,jdbcType=NUMERIC}
+        where
+        id = #{id,jdbcType=NUMERIC}
+    </update>
 </mapper>

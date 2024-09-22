@@ -15,4 +15,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface BlogMapper extends BaseMapper<Blog> {
     Blog queryOneById(@Param("id") Long id);
+
+    int updateLikedById(@Param("liked") Long liked, @Param("id") Long id);
+
+    boolean icrLikedById(@Param("id") Long id);
+    boolean dcrLikedById(@Param("id") Long id);
+
 }

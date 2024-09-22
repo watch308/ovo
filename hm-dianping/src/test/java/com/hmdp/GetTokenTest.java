@@ -1,6 +1,8 @@
 package com.hmdp;
 
 import cn.hutool.core.lang.UUID;
+import com.hmdp.utils.RedisIdWorker;
+import com.hmdp.utils.UserHolder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import static com.hmdp.utils.RedisConstants.LOGIN_USER_KEY;
 public class GetTokenTest {
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    RedisIdWorker redisIdWorker;
 
     @Test
     public void createTokensAndWrite() {
@@ -28,9 +32,9 @@ public class GetTokenTest {
             String token = UUID.randomUUID().toString(true);
             // 转换Long id
             Map<String, String> map = new HashMap<>();
-            Random random = new Random();
-            String v = String.valueOf(random.nextInt(10000));
-            map.put("id", v);
+            long v = redisIdWorker.nextId("token");
+            redisTemplate.opsForSet().add("count", String.valueOf(v));
+            map.put("id", String.valueOf(v));
             // 保存登录信息到 Redis
             redisTemplate.opsForHash().putAll(LOGIN_USER_KEY + token, map);
             tokens.add(token);
@@ -67,6 +71,12 @@ public class GetTokenTest {
         } catch (IOException e) {
             System.err.println("Error writing tokens to file: " + e.getMessage());
         }
+
+    }
+    @Test
+    public void count(){
+        Long id = UserHolder.getUser().getId();
+
 
     }
 }

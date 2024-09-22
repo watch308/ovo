@@ -18,6 +18,9 @@ public interface UserMapper extends BaseMapper<User> {
     User selectUserByPhone(String phone);
 
     User selectOneById(@Param("id") Long id);
+
+    List<UserDTO> selectAllById(List<Long>id);
+
     int insertSelective(User user);
 
     String selectPasswordByPhone(@Param("phone") String phone);

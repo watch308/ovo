@@ -47,4 +47,10 @@
         )
 
     </select>
+    <select id="queryUserIdByFollowUserId" resultType="java.lang.Long">
+        select user_id
+        from tb_follow
+        where
+        follow_user_id = #{followUserId,jdbcType=NUMERIC}
+    </select>
 </mapper>

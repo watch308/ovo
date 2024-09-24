@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface BlogMapper extends BaseMapper<Blog> {
     Blog queryOneById(@Param("id") Long id);
+    List<Blog> queryByIdOrderById(List<Long>id);
 
     int updateLikedById(@Param("liked") Long liked, @Param("id") Long id);
 

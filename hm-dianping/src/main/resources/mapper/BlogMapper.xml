@@ -9,6 +9,19 @@
         where
         id = #{id,jdbcType=NUMERIC}
     </select>
+    <select id="queryByIdOrderById" resultType="com.hmdp.entity.Blog">
+        select comments, content,  images, liked, shop_id, title, user_id
+        from
+        tb_blog
+        where id in
+        <foreach collection="list" open="(" item="id" close=")" separator=",">
+            ${id}
+        </foreach>
+        order by field
+        <foreach collection="list" open="(id," item="id" close=")" separator=",">
+            ${id}
+        </foreach>
+    </select>
     <update id="icrLikedById">
         update tb_blog
         set liked = liked+1

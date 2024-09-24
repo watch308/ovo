@@ -21,4 +21,6 @@ public interface FollowMapper extends BaseMapper<Follow> {
 
     int countByUserIdAndFollowUserId(@Param("userId") Long userId, @Param("followUserId") Long followUserId);
     List<Long> commonFollowId(@Param("userId") Long userId, @Param("targetId") Long targetId);
+
+    List<Long> queryUserIdByFollowUserId(@Param("followUserId") Long followUserId);
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hmdp.mapper.BlogMapper">
+
+    <select id="queryOneById" resultType="com.hmdp.entity.Blog">
+        select *
+        from tb_blog
+        where
+        id = #{id,jdbcType=NUMERIC}
+    </select>
+    <select id="queryByIdOrderById" resultType="com.hmdp.entity.Blog">
+        select comments, content,  images, liked, shop_id, title, user_id
+        from
+        tb_blog
+        where id in
+        <foreach collection="list" open="(" item="id" close=")" separator=",">
+            ${id}
+        </foreach>
+        order by field
+        <foreach collection="list" open="(id," item="id" close=")" separator=",">
+            ${id}
+        </foreach>
+    </select>
+    <update id="icrLikedById">
+        update tb_blog
+        set liked = liked+1
+        where
+        id = #{id,jdbcType=NUMERIC}
+    </update>
+    <update id="dcrLikedById">
+        update tb_blog
+        set liked = liked-1
+        where
+        id = #{id,jdbcType=NUMERIC}
+    </update>
+    <update id="updateLikedById">
+        update tb_blog
+        set liked = #{liked,jdbcType=NUMERIC}
+        where
+        id = #{id,jdbcType=NUMERIC}
+    </update>
+</mapper>

@@ -12,12 +12,17 @@ import com.hmdp.entity.User;
 import com.hmdp.mapper.UserMapper;
 import com.hmdp.service.IUserService;
 import com.hmdp.utils.RegexUtils;
+import com.hmdp.utils.UserHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -120,11 +125,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         else if(StrUtil.isBlank(user.getPassword())){
             //老用户没有设置密码
-            User temp = new User();
-            temp.setPassword(remotePassword);
-            temp.setPhone(phone);
-            userMapper.updateSelective(temp);
-            return Result.ok("注册成功，重新登录");
+            return Result.fail("登陆失败");
         }
         else {
             String password = userMapper.selectPasswordByPhone(phone);
@@ -156,5 +157,53 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 删除token
         redisTemplate.delete(LOGIN_USER_KEY + authorization);
         return Result.ok();
+    }
+
+    @Override
+    public Result sign() {
+        //获取日期
+        LocalDateTime localDateTime = LocalDateTime.now();
+        int year = localDateTime.getYear();
+        int value = localDateTime.getMonth().getValue();
+        int dayOfMonth = localDateTime.getDayOfMonth();
+        //获取用户
+        UserDTO user = UserHolder.getUser();
+        if(user==null){
+            return Result.ok("未登录");
+        }
+        Long id = user.getId();
+        String key = USER_SIGN_KEY+id+":"+year+":"+value;
+        redisTemplate.opsForValue().setBit(key,dayOfMonth,true);
+        return Result.ok();
+    }
+
+    @Override
+    public Result signCount() {
+        //获取日期
+        LocalDateTime localDateTime = LocalDateTime.now();
+        int year = localDateTime.getYear();
+        int value = localDateTime.getMonth().getValue();
+        int dayOfMonth = localDateTime.getDayOfMonth();
+        //获取用户
+        UserDTO user = UserHolder.getUser();
+        if (user==null){
+            return Result.fail("未登录");
+        }
+        Long id = user.getId();
+        String key = USER_SIGN_KEY+id+":"+year+":"+value;
+        List<Long> signDays = redisTemplate.opsForValue().bitField(key, BitFieldSubCommands.create()
+                .get(BitFieldSubCommands.BitFieldType.unsigned(dayOfMonth+1)).valueAt(0)
+        );
+        if (signDays==null||signDays.isEmpty()){
+            return Result.ok(0);
+        }
+        Long signDay = signDays.get(0);
+        int count =0;
+        while ((signDay & 1) != 0) {
+            count++;
+            signDay >>>= 1;
+
+        }
+        return Result.ok(count);
     }
 }

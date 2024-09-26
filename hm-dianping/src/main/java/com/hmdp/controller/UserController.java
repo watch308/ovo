@@ -8,6 +8,7 @@ import com.hmdp.dto.Result;
 import com.hmdp.dto.UserDTO;
 import com.hmdp.entity.User;
 import com.hmdp.entity.UserInfo;
+import com.hmdp.mapper.UserMapper;
 import com.hmdp.service.IUserInfoService;
 import com.hmdp.service.IUserService;
 import com.hmdp.utils.UserHolder;
@@ -40,6 +41,8 @@ public class UserController {
 
     @Resource
     private IUserInfoService userInfoService;
+    @Autowired
+    UserMapper userMapper;
 
     /**
      * 发送手机验证码
@@ -94,5 +97,20 @@ public class UserController {
         info.setUpdateTime(null);
         // 返回
         return Result.ok(info);
+    }
+    @GetMapping("/{id}")
+    public Result queryUser(@PathVariable("id") Long id) {
+        User user = userMapper.selectOneById(id);
+        if (user==null)
+            return Result.ok();
+        return Result.ok(user);
+    }
+    @PostMapping("/sign")
+    public Result sign(){
+        return userService.sign();
+    }
+    @GetMapping("/sign/count")
+    public Result count(){
+        return userService.signCount();
     }
 }

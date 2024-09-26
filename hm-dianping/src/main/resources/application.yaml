@@ -1,6 +1,9 @@
 server:
   port: 8081
 spring:
+  mvc:
+    servlet:
+      load-on-startup: 100
   application:
     name: hmdp
   datasource:

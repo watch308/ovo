@@ -1,4 +1,6 @@
 package com.hmdp.mapper;
+import org.apache.ibatis.annotations.Param;
+import java.util.List;
 
 import com.hmdp.entity.Shop;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -17,5 +19,8 @@ public interface ShopMapper extends BaseMapper<Shop> {
     @Override
     Shop selectById(Serializable id);
 
+    List<Shop> selectByIdOrderById( List<Long> id);
     void update(Shop shop);
+
+    List<Shop> selectXAndIdAndYAndTypeId();
 }

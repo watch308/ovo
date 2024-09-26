@@ -57,7 +57,7 @@ public class GetTokenTest {
         Map<String, String> map = new HashMap<>();
         Random random = new Random();
         String v = String.valueOf(random.nextInt(10000));
-        map.put("id", v);
+        map.put("id", "3366");
         // 保存登录信息到 Redis
         redisTemplate.opsForHash().putAll(LOGIN_USER_KEY + token, map);
         tokens.add(token);
